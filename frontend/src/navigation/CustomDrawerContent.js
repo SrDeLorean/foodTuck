@@ -12,7 +12,19 @@ export default function CustomDrawerContent(props) {
   return (
     <View style={{ flex: 1 }}>
       <DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1 }}>
-        <DrawerItemList {...props} />
+        {props.guest && (
+          <DrawerItem label="Inicio" onPress={() => navigation.navigate('GuestHome')} />
+        )}
+        {props.foodtruck && (
+ <DrawerItem label="Inicio FoodTruck" onPress={() => navigation.navigate('FoodTruckHome')} />
+ )}
+        {props.manager && (
+ <DrawerItem label="Inicio Manager" onPress={() => navigation.navigate('ManagerHome')} />
+        )}
+        {props.guest && (
+          <DrawerItem label="Productos" onPress={() => navigation.navigate('ProductoList')} />
+        )}
+
         <View style={styles.bottom}>
           {!user ? (
             <>
