@@ -1,155 +1,116 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { createProduct } from '../../services/productoService'; // Assuming createProduct exists
+import Toast from 'react-native-toast-message';
+import { formInputStyles } from '../../styles/formInputStyles';
+import { formStyles } from '../../styles/formStyles';
+import { buttonStyles } from '../../styles/buttonStyles';
+import { createProduct } from '../../services/productoService';
 
 export default function ProductoCreateScreen() {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [price, setPrice] = useState(''); // Price can be a string initially
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
   const navigation = useNavigation();
 
-  const handleCreateProduct = async () => {
-    if (!name || !price) {
-      Alert.alert('Error', 'Nombre y precio son obligatorios.');
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [price, setPrice] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleCreate = async () => {
+    if (!name.trim() || !description.trim() || !price.trim()) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Todos los campos son obligatorios.',
+      });
+      return;
+    }
+
+    if (isNaN(price) || Number(price) <= 0) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'El precio debe ser un número positivo.',
+      });
       return;
     }
 
     setLoading(true);
-    setError(null); // Clear previous errors
-
     try {
-      // Convert price to a number before sending
-      const productData = {
-        name,
-        description,
-        price: parseFloat(price),
-      };
-      await createProduct(productData); // Call the service function
-      Alert.alert('Éxito', 'Producto creado correctamente.');
-      navigation.navigate('ProductoList'); // Navigate back to the product list
-    } catch (err) {
-      setError('Error al crear el producto.');
-      console.error(err);
-      Alert.alert('Error', 'Hubo un problema al crear el producto.');
+      await createProduct({ name, description, price: Number(price) });
+      Toast.show({
+        type: 'success',
+        text1: 'Éxito',
+        text2: 'Producto creado correctamente.',
+      });
+      navigation.navigate('ProductoList');
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Error al crear el producto.',
+      });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Crear Producto</Text>
-
-      <View style={styles.formCard}>
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Nombre del Producto:</Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={formStyles.container}
+    >
+      <View style={{ width: '100%', maxWidth: 600 }}>
+        {/* Nombre */}
+        <View style={formInputStyles.container}>
+          <Text style={formInputStyles.label}>Nombre producto</Text>
+          <TextInput
+            style={formInputStyles.input}
+            placeholder="Ingrese nombre"
+            value={name}
+            onChangeText={setName}
+          />
         </View>
-      <TextInput
-        style={styles.input}
-        placeholderTextColor="#888" // Placeholder color
 
-        placeholder="Nombre del Producto"
-        value={name}
-        onChangeText={setName}
-      />
-      <TextInput
-        style={[styles.input, styles.descriptionInput]}
-        placeholder="Descripción"
-        placeholderTextColor="#888" // Placeholder color
-
-        value={description}
-        onChangeText={setDescription}
-        multiline
-      />
-
-      <View style={styles.formGroup}>
-          <Text style={styles.label}>Precio:</Text>
+        {/* Descripción */}
+        <View style={formInputStyles.container}>
+          <Text style={formInputStyles.label}>Descripción</Text>
+          <TextInput
+            style={formInputStyles.input}
+            placeholder="Ingrese descripción"
+            value={description}
+            onChangeText={setDescription}
+            multiline
+            numberOfLines={3}
+          />
         </View>
-      <TextInput
-        placeholderTextColor="#888" // Placeholder color
-        style={styles.input}
-        placeholder="Precio"
-        value={price}
-        onChangeText={setPrice}
-        keyboardType="numeric" // Use numeric keyboard for price
-      />
 
+        {/* Precio */}
+        <View style={formInputStyles.container}>
+          <Text style={formInputStyles.label}>Precio</Text>
+          <TextInput
+            style={formInputStyles.input}
+            placeholder="Ingrese precio"
+            value={price}
+            onChangeText={setPrice}
+            keyboardType="numeric"
+          />
+        </View>
+
+        {/* Botón Crear */}
+        <TouchableOpacity
+          style={[buttonStyles.button, buttonStyles.primary, { marginTop: 20 }]}
+          onPress={handleCreate}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={buttonStyles.buttonText}>Crear Producto</Text>
+          )}
+        </TouchableOpacity>
       </View>
-      {error && <Text style={styles.errorText}>{error}</Text>}
 
-      <TouchableOpacity
-        style={styles.createButton}
-        onPress={handleCreateProduct}
-        disabled={loading} // Disable button while loading
-      >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>Crear Producto</Text>
-        )}
-      </TouchableOpacity>
-    </View>
+      <Toast />
+    </KeyboardAvoidingView>
   );
 }
-
-// Updated styles for Product Creation Screen
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: '#f8f8f8',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#333',
-    textAlign: 'center',
-  },
-  formGroup: {
-    marginBottom: 15,
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 8,
-    color: '#555',
-  },
-  input: {
-    height: 45,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    backgroundColor: '#fff',
-    fontSize: 16,
-  },
-  descriptionInput: {
-    height: 100, // Larger height for description
-    textAlignVertical: 'top', // Align text to the top on Android
-  },
-  createButton: {
-    backgroundColor: '#007bff', // Blue color for create button
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textTransform: 'uppercase', // Optional: uppercase text
-  },
-  errorText: {
-    color: 'red',
-    fontSize: 15,
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-});

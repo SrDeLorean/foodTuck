@@ -2,9 +2,9 @@ import React from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { View, StyleSheet, Text } from 'react-native';
 
-import CustomDrawerContent from './CustomDrawerContent';
-import Footer from '../components/Footer';
-import FoodTruckHome from '../views/foodtruck/FoodTruckHome';
+import CustomDrawerContent from '../CustomDrawerContent';
+import Footer from '../../components/LayoutWithFooter';
+import FoodTruckHome from '../../views/foodtruck/FoodTruckHome';
 
 const Drawer = createDrawerNavigator();
 export default function FoodTruckNavigator() {

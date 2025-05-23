@@ -1,9 +1,10 @@
 import React, { useState, useContext } from 'react';
 import { View, TextInput, Button, StyleSheet, Text, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { AuthContext } from '../../context/AuthContext';
+import { AuthContext } from '../../context/AuthContext'; // Ensure correct path
+
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
+ const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useContext(AuthContext);
 
@@ -17,7 +18,8 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Bienvenido de Nuevo</Text>
+      <Text style={styles.title}>
+ Bienvenido de Nuevo</Text>
       <Text style={styles.subtitle}>Descubre sabores sobre ruedas</Text>
 
       {/* Email Input */}
@@ -51,13 +53,14 @@ export default function LoginScreen() {
         <Text style={styles.termsLink}>¿Olvidaste tu contraseña?</Text>
       </TouchableOpacity>
       
-      {/* Primary Login Button */}
+      {/* Primary Login Button */
+        /* Modified onPress to call the simulated login function */ }
       <TouchableOpacity 
         style={styles.primaryButton}
         onPress={handleLogin}>
 
         <Text style={styles.primaryButtonText}>Iniciar Sesión</Text>
-      </TouchableOpacity>
+ </TouchableOpacity>
 
            {/* Botón Registrarse con Google */}
            <TouchableOpacity
@@ -73,7 +76,7 @@ export default function LoginScreen() {
 
       {/* Link to Register */}
       <TouchableOpacity
-        onPress={() => navigation.navigate('RegisterScreen')}
+        onPress={() => {/* Add navigation logic here, e.g., navigation.navigate('RegisterScreen') */}}
       >
         <Text style={styles.registerLinkText}>¿No tienes cuenta?</Text>
       </TouchableOpacity>

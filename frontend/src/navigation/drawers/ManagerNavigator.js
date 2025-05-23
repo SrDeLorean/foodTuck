@@ -2,9 +2,9 @@ import React from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { View, StyleSheet } from 'react-native';
 
-import CustomDrawerContent from './CustomDrawerContent';
-import Footer from '../components/Footer';
-import ManagerHome from '../views/manager/ManagerHome';
+import CustomDrawerContent from '../CustomDrawerContent';
+import Footer from '../../components/LayoutWithFooter';
+import ManagerHome from '../../views/manager/ManagerHome';
 
 const Drawer = createDrawerNavigator();
 

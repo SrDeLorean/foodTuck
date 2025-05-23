@@ -1,153 +1,149 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  ActivityIndicator,
-} from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
-import { getProductById, updateProduct } from '../../services/productoService'; // Assuming these functions exist
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
+import { formInputStyles } from '../../styles/formInputStyles';
+import { formStyles } from '../../styles/formStyles';
+import { buttonStyles } from '../../styles/buttonStyles';
+import { getProductById, updateProduct } from '../../services/productoService';
 
 export default function ProductoEditScreen() {
-  const route = useRoute();
-  const { productId } = route.params; // Get product ID from route params
+  const navigation = useNavigation();
+  const { productId } = useRoute().params;
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
-  const [loading, setLoading] = useState(true); // Loading for initial fetch and for saving
-  const [error, setError] = useState(null);
-
-  const navigation = useNavigation();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const fetchProductDetails = async () => {
+    const fetchProduct = async () => {
       try {
-        const product = await getProductById(productId); // Fetch product details
+        const product = await getProductById(productId);
         setName(product.name);
         setDescription(product.description);
-        setPrice(product.price.toString()); // Convert price to string for TextInput
+        setPrice(String(product.price));
+      } catch (error) {
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: 'No se pudo cargar el producto.',
+        });
+        navigation.goBack();
+      } finally {
         setLoading(false);
-      } catch (err) {
-        setError('Error al cargar los detalles del producto.');
-        setLoading(false);
-        console.error(err);
       }
     };
 
-    fetchProductDetails();
-  }, [productId]); // Rerun effect if productId changes
+    fetchProduct();
+  }, [productId]);
 
-  const handleUpdateProduct = async () => {
-    setLoading(true); // Set loading for the update operation
-    setError(null); // Clear previous errors
+  const handleUpdate = async () => {
+    if (!name.trim() || !description.trim() || !price.trim()) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Todos los campos son obligatorios.',
+      });
+      return;
+    }
+
+    if (isNaN(price) || Number(price) <= 0) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'El precio debe ser un número positivo.',
+      });
+      return;
+    }
+
+    setSaving(true);
     try {
-      const updatedProductData = {
-        name,
-        description,
-        price: parseFloat(price), // Convert price back to number
-      };
-      await updateProduct(productId, updatedProductData); // Call update service
-      setLoading(false);
-      navigation.navigate('ProductoList'); // Navigate back after successful update
-    } catch (err) {
-      setError('Error al actualizar el producto.');
-      setLoading(false);
-      console.error(err);
+      await updateProduct(productId, { name, description, price: Number(price) });
+      Toast.show({
+        type: 'success',
+        text1: 'Éxito',
+        text2: 'Producto actualizado correctamente.',
+      });
+      navigation.goBack();
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Error al actualizar el producto.',
+      });
+    } finally {
+      setSaving(false);
     }
   };
 
   if (loading) {
     return (
-      <View style={styles.container}>
+      <View style={formStyles.container}>
         <ActivityIndicator size="large" color="#0000ff" />
-        <Text>Cargando datos del producto...</Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>{error}</Text>
+        <Text style={{ marginTop: 10 }}>Cargando producto...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.formContainer}>
-      <Text style={styles.title}>Editar Producto</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Nombre del Producto"
-        value={name}
-        onChangeText={setName}
-      />
-      <TextInput
-        style={[styles.input, styles.descriptionInput]}
-        placeholder="Descripción"
-        value={description}
-        onChangeText={setDescription}
-        multiline
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Precio"
-        value={price}
-        onChangeText={setPrice}
-        keyboardType="numeric"
-      />
-      <TouchableOpacity style={styles.button} onPress={handleUpdateProduct}>
-        <Text style={styles.buttonText}>Guardar Cambios</Text>
-      </TouchableOpacity>
-    </View>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={formStyles.container}
+    >
+      <View style={{ width: '100%', maxWidth: 600 }}>
+        {/* Nombre */}
+        <View style={formInputStyles.container}>
+          <Text style={formInputStyles.label}>Nombre producto</Text>
+          <TextInput
+            style={formInputStyles.input}
+            placeholder="Ingrese nombre"
+            value={name}
+            onChangeText={setName}
+          />
+        </View>
+
+        {/* Descripción */}
+        <View style={formInputStyles.container}>
+          <Text style={formInputStyles.label}>Descripción</Text>
+          <TextInput
+            style={formInputStyles.input}
+            placeholder="Ingrese descripción"
+            value={description}
+            onChangeText={setDescription}
+            multiline
+            numberOfLines={3}
+          />
+        </View>
+
+        {/* Precio */}
+        <View style={formInputStyles.container}>
+          <Text style={formInputStyles.label}>Precio</Text>
+          <TextInput
+            style={formInputStyles.input}
+            placeholder="Ingrese precio"
+            value={price}
+            onChangeText={setPrice}
+            keyboardType="numeric"
+          />
+        </View>
+
+        {/* Botón Guardar */}
+        <TouchableOpacity
+          style={[buttonStyles.button, buttonStyles.primary, { marginTop: 20 }]}
+          onPress={handleUpdate}
+          disabled={saving}
+        >
+          {saving ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={buttonStyles.buttonText}>Guardar Cambios</Text>
+          )}
+        </TouchableOpacity>
+      </View>
+
+      <Toast />
+    </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  formContainer: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#f5f5f5',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-    color: '#333',
-  },
-  input: {
-    backgroundColor: '#fff',
-    padding: 15,
-    marginBottom: 15,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    fontSize: 16,
-  },
-  descriptionInput: {
-    minHeight: 100,
-    textAlignVertical: 'top', // Align text to the top on Android
-  },
-  button: {
-    backgroundColor: '#007bff', // Example primary color
-    padding: 15,
-    borderRadius: 5,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  errorText: {
-    color: 'red',
-    fontSize: 16,
-    textAlign: 'center',
-    marginTop: 20,
-  },
-});

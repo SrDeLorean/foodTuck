@@ -1,6 +1,5 @@
 // src/context/AuthContext.js
 import React, { createContext, useState, useEffect } from 'react';
-import axios from 'axios';
 import storage from '../utils/storage';
 
 export const AuthContext = createContext();
@@ -8,20 +7,20 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
-  const login = async (email, password) => {
-    try {
-      const response = await axios.post('http://192.168.3.179/expo-admin/backend/public/api/login', {
-        email,
-        password,
-      });
+  const data = {
+    user: {
+      nombre: "Sebastian",
+      role: "admin",
+    },
+    token: "sadasdsaf34180vusd9314",
+  };
 
-      const { token, user: userData } = response.data;
-      await storage.setItem('token', token);
-      await storage.setItem('user', JSON.stringify(userData));
-      setUser({ token, ...userData });
-    } catch (e) {
-      throw new Error('Login fallido');
-    }
+  const login = async (email, password) => {
+    // Simulación de login, reemplaza con llamada real a API
+    const { token, user: userData } = data;
+    await storage.setItem('token', token);
+    await storage.setItem('user', JSON.stringify(userData));
+    setUser({ token, ...userData });
   };
 
   const logout = async () => {
