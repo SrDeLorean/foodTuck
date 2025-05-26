@@ -1,6 +1,12 @@
 import { useState, useMemo } from 'react';
 
-export function useFilterSort(data, initialFilter = '', initialSortColumn = null, initialSortDirection = 'asc') {
+export function useFilterSort(
+  data,
+  initialFilter = '',
+  initialSortColumn = null,
+  initialSortDirection = 'asc',
+  filterColumns = null, // opcional: array con campos para filtrar
+) {
   const [filterText, setFilterText] = useState(initialFilter);
   const [sortColumn, setSortColumn] = useState(initialSortColumn);
   const [sortDirection, setSortDirection] = useState(initialSortDirection);
@@ -8,17 +14,20 @@ export function useFilterSort(data, initialFilter = '', initialSortColumn = null
   const filteredAndSortedData = useMemo(() => {
     if (!data) return [];
 
-    const filtered = data.filter((item) => {
-      if (!filterText) return true;
-      const lowerFilter = filterText.toLowerCase();
+    const trimmedFilter = filterText.trim().toLowerCase();
 
-      // Aquí puedes generalizar el filtrado con base en todas las propiedades de item
-      return Object.values(item).some(value =>
-        value !== null &&
-        value !== undefined &&
-        value.toString().toLowerCase().includes(lowerFilter)
-      );
-    });
+    const filtered = trimmedFilter
+      ? data.filter(item => {
+          const valuesToCheck = filterColumns
+            ? filterColumns.map(col => item[col])
+            : Object.values(item);
+
+          return valuesToCheck.some(value =>
+            value != null &&
+            value.toString().toLowerCase().includes(trimmedFilter)
+          );
+        })
+      : data;
 
     if (!sortColumn) return filtered;
 
@@ -26,15 +35,20 @@ export function useFilterSort(data, initialFilter = '', initialSortColumn = null
       const aValue = a[sortColumn];
       const bValue = b[sortColumn];
 
+      // Manejo valores nulos: null/undefined al final
+      if (aValue == null && bValue == null) return 0;
+      if (aValue == null) return 1;
+      if (bValue == null) return -1;
+
       if (typeof aValue === 'number' && typeof bValue === 'number') {
         return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
       } else {
-        const strA = String(aValue ?? '').toLowerCase();
-        const strB = String(bValue ?? '').toLowerCase();
+        const strA = String(aValue).toLowerCase();
+        const strB = String(bValue).toLowerCase();
         return sortDirection === 'asc' ? strA.localeCompare(strB) : strB.localeCompare(strA);
       }
     });
-  }, [data, filterText, sortColumn, sortDirection]);
+  }, [data, filterText, sortColumn, sortDirection, filterColumns]);
 
   return {
     filterText,

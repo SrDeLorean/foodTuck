@@ -1,36 +1,41 @@
+//src/styles/buttonStyles.js
 import { StyleSheet } from 'react-native';
-import { responsiveFontSize, responsiveWidth, responsiveHeight } from './responsive';
 
 export const buttonStyles = StyleSheet.create({
   button: {
-    paddingVertical: responsiveHeight(12),
-    paddingHorizontal: responsiveWidth(20),
+    paddingVertical: 10,
+    paddingHorizontal: 16,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    minWidth: responsiveWidth(120),
+    marginVertical: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 2,
+    minWidth: 120,
   },
-  buttonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: responsiveFontSize(16),
-  },
+
   primary: {
     backgroundColor: '#007bff',
   },
+
   secondary: {
     backgroundColor: '#6c757d',
   },
-  success: {
-    backgroundColor: '#28a745',
+
+  info: {
+    backgroundColor: '#17a2b8',
   },
+
   danger: {
     backgroundColor: '#dc3545',
   },
-  warning: {
-    backgroundColor: '#ffc107',
-  },
-  info: {
-    backgroundColor: '#17a2b8',
+
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

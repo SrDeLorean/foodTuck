@@ -1,3 +1,4 @@
+//src/views/producto/ProductoDetailScreen.js
 import React, { useState, useEffect } from 'react';
 import { View, Text, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';

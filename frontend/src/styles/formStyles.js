@@ -1,18 +1,28 @@
-import { StyleSheet } from 'react-native';
-import { responsiveWidth, responsiveHeight } from './responsive';
+//src/styles/formStyles.js
+import { StyleSheet, Dimensions } from 'react-native';
+
+const windowWidth = Dimensions.get('window').width;
 
 export const formStyles = StyleSheet.create({
   formContainer: {
     flex: 1,
-    paddingHorizontal: responsiveWidth(15),
-    paddingVertical: responsiveHeight(12),
-    backgroundColor: '#f8f9fa',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    justifyContent: 'center',
+    maxWidth: 600,
+    alignSelf: 'center',
+    width: windowWidth > 600 ? 600 : '100%',  // Limita ancho maximo para pantallas grandes
   },
-  formGroup: {
-    marginBottom: responsiveHeight(16),
+
+  formTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 16,
+    color: '#222',
+    textAlign: 'center',
   },
-  buttonContainer: {
-    marginTop: responsiveHeight(20),
-    alignItems: 'center',
+
+  formButtonContainer: {
+    marginTop: 24,
   },
 });
