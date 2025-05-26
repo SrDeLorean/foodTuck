@@ -1,101 +1,69 @@
-//src/views/producto/ProductoDetailScreen.js
-import React, { useState, useEffect } from 'react';
-import { View, Text, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
-import { getProductById, deleteProduct } from '../../services/productoService';
+// src/views/producto/ProductoDetailScreen.js
+import React from 'react';
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  TouchableOpacity,
+} from 'react-native';
+import Toast from 'react-native-toast-message';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { formStyles } from '../../styles/formStyles';
-import { buttonStyles } from '../../styles/buttonStyles';
+import { getProductById } from '../../services/productoService';
+import CardScrollView from '../../components/CardScrollView';
+import { useFetchById } from '../../hooks/useFetchById';
 
 export default function ProductoDetailScreen() {
-  const { productId } = useRoute().params;
   const navigation = useNavigation();
+  const { productId } = useRoute().params;
 
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchProductDetails = async () => {
-      try {
-        const data = await getProductById(productId);
-        setProduct(data);
-      } catch (err) {
-        setError('Error al cargar los detalles del producto.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProductDetails();
-  }, [productId]);
-
-  const handleDelete = async () => {
-    Alert.alert(
-      'Confirmar eliminación',
-      '¿Estás seguro de que deseas eliminar este producto?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await deleteProduct(productId);
-              navigation.navigate('ProductoList'); // Volver a lista tras eliminar
-            } catch (err) {
-              setError('Error al eliminar el producto.');
-            }
-          },
-        },
-      ]
-    );
-  };
+  const { data: product, loading } = useFetchById(getProductById, productId, () => navigation.goBack());
 
   if (loading) {
     return (
       <View style={formStyles.container}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text style={{ marginTop: 10 }}>Cargando detalles...</Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={formStyles.container}>
-        <Text style={formStyles.errorText}>{error}</Text>
+        <ActivityIndicator size="large" color="#007bff" />
       </View>
     );
   }
 
   return (
-    <View style={formStyles.container}>
-      {product ? (
-        <>
-          <View style={formStyles.card}>
-            <Text style={formStyles.title}>{product.name}</Text>
-            <Text style={formStyles.label}>{product.description}</Text>
-            <Text style={[formStyles.label, { color: '#007bff', fontWeight: 'bold' }]}>
-              Precio: ${product.price}
-            </Text>
-          </View>
+    <CardScrollView>
+      <View style={formStyles.detailContainer}>
+        <View style={formStyles.detailRow}>
+          <Text style={formStyles.detailLabel}>ID:</Text>
+          <Text style={formStyles.detailValue}>{product.id}</Text>
+        </View>
 
-          <TouchableOpacity
-            style={[buttonStyles.button, buttonStyles.primary]}
-            onPress={() => navigation.navigate('ProductoEdit', { productId })}
-          >
-            <Text style={buttonStyles.buttonText}>Editar</Text>
-          </TouchableOpacity>
+        <View style={formStyles.detailRow}>
+          <Text style={formStyles.detailLabel}>Nombre:</Text>
+          <Text style={formStyles.detailValue}>{product.name}</Text>
+        </View>
 
-          <TouchableOpacity
-            style={[buttonStyles.button, buttonStyles.danger]}
-            onPress={handleDelete}
-          >
-            <Text style={buttonStyles.buttonText}>Eliminar</Text>
-          </TouchableOpacity>
-        </>
-      ) : (
-        <Text>No se encontraron detalles del producto.</Text>
-      )}
-    </View>
+        <View style={formStyles.detailRow}>
+          <Text style={formStyles.detailLabel}>Precio:</Text>
+          <Text style={formStyles.detailValue}>${product.price}</Text>
+        </View>
+
+        <View style={formStyles.detailRow}>
+          <Text style={formStyles.detailLabel}>Creado por:</Text>
+          <Text style={formStyles.detailValue}>{product.creadoPor}</Text>
+        </View>
+
+        <View style={formStyles.detailRow}>
+          <Text style={formStyles.detailLabel}>fecha de creación:</Text>
+          <Text style={formStyles.detailValue}>{product.fecha}</Text>
+        </View>
+
+        <TouchableOpacity
+          style={formStyles.button}
+          onPress={() => navigation.navigate('ProductoEdit', { productId })}
+        >
+          <Text style={formStyles.buttonText}>Editar</Text>
+        </TouchableOpacity>
+      </View>
+
+      <Toast />
+    </CardScrollView>
   );
 }

@@ -1,150 +1,76 @@
-//src/views/producto/ProductoEditScreen.js
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+// src/views/producto/ProductoEditScreen.js
+import React, { useEffect, useState } from 'react';
+import { KeyboardAvoidingView, Platform, ActivityIndicator, View } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { formInputStyles } from '../../styles/formInputStyles';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import ProductForm from './ProductForm';
 import { formStyles } from '../../styles/formStyles';
-import { buttonStyles } from '../../styles/buttonStyles';
 import { getProductById, updateProduct } from '../../services/productoService';
+import CardScrollView from '../../components/CardScrollView';
 
 export default function ProductoEditScreen() {
   const navigation = useNavigation();
-  const { productId } = useRoute().params;
+  const route = useRoute();
+  const { productId } = route.params;
 
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [price, setPrice] = useState('');
+  const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const product = await getProductById(productId);
-        setName(product.name);
-        setDescription(product.description);
-        setPrice(String(product.price));
-      } catch (error) {
-        Toast.show({
-          type: 'error',
-          text1: 'Error',
-          text2: 'No se pudo cargar el producto.',
-        });
-        navigation.goBack();
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProduct();
-  }, [productId]);
+  }, []);
 
-  const handleUpdate = async () => {
-    if (!name.trim() || !description.trim() || !price.trim()) {
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: 'Todos los campos son obligatorios.',
-      });
-      return;
-    }
-
-    if (isNaN(price) || Number(price) <= 0) {
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: 'El precio debe ser un número positivo.',
-      });
-      return;
-    }
-
-    setSaving(true);
+  const fetchProduct = async () => {
     try {
-      await updateProduct(productId, { name, description, price: Number(price) });
-      Toast.show({
-        type: 'success',
-        text1: 'Éxito',
-        text2: 'Producto actualizado correctamente.',
-      });
-      navigation.goBack();
+      setLoading(true);
+      const data = await getProductById(productId);
+      setProduct(data);
     } catch (error) {
       Toast.show({
         type: 'error',
         text1: 'Error',
-        text2: 'Error al actualizar el producto.',
+        text2: 'No se pudo cargar el producto 😓',
       });
+      navigation.goBack();
     } finally {
-      setSaving(false);
+      setLoading(false);
+    }
+  };
+
+  const handleUpdate = async (updatedProduct) => {
+    try {
+      await updateProduct(productId, updatedProduct);
+      Toast.show({
+        type: 'success',
+        text1: 'Producto actualizado',
+        text2: `${updatedProduct.name} fue modificado exitosamente 🎉`,
+      });
+      navigation.goBack();
+    } catch {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'No se pudo actualizar el producto 😓',
+      });
     }
   };
 
   if (loading) {
     return (
       <View style={formStyles.container}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text style={{ marginTop: 10 }}>Cargando producto...</Text>
+        <ActivityIndicator size="large" color="#007bff" />
       </View>
     );
   }
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={formStyles.container}
-    >
-      <View style={{ width: '100%', maxWidth: 600 }}>
-        {/* Nombre */}
-        <View style={formInputStyles.container}>
-          <Text style={formInputStyles.label}>Nombre producto</Text>
-          <TextInput
-            style={formInputStyles.input}
-            placeholder="Ingrese nombre"
-            value={name}
-            onChangeText={setName}
-          />
-        </View>
-
-        {/* Descripción */}
-        <View style={formInputStyles.container}>
-          <Text style={formInputStyles.label}>Descripción</Text>
-          <TextInput
-            style={formInputStyles.input}
-            placeholder="Ingrese descripción"
-            value={description}
-            onChangeText={setDescription}
-            multiline
-            numberOfLines={3}
-          />
-        </View>
-
-        {/* Precio */}
-        <View style={formInputStyles.container}>
-          <Text style={formInputStyles.label}>Precio</Text>
-          <TextInput
-            style={formInputStyles.input}
-            placeholder="Ingrese precio"
-            value={price}
-            onChangeText={setPrice}
-            keyboardType="numeric"
-          />
-        </View>
-
-        {/* Botón Guardar */}
-        <TouchableOpacity
-          style={[buttonStyles.button, buttonStyles.primary, { marginTop: 20 }]}
-          onPress={handleUpdate}
-          disabled={saving}
-        >
-          {saving ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={buttonStyles.buttonText}>Guardar Cambios</Text>
-          )}
-        </TouchableOpacity>
-      </View>
-
+    <CardScrollView>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ProductForm onSubmit={handleUpdate} initialData={product} />
+      </KeyboardAvoidingView>
       <Toast />
-    </KeyboardAvoidingView>
+    </CardScrollView>
   );
 }

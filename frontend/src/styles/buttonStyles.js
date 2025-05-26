@@ -1,40 +1,43 @@
-//src/styles/buttonStyles.js
 import { StyleSheet } from 'react-native';
 
 export const buttonStyles = StyleSheet.create({
-  button: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 8,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 2,
-    minWidth: 120,
-  },
-
   primary: {
     backgroundColor: '#007bff',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginVertical: 8,
   },
-
-  secondary: {
-    backgroundColor: '#6c757d',
+  primaryText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
-
-  info: {
-    backgroundColor: '#17a2b8',
-  },
-
   danger: {
     backgroundColor: '#dc3545',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginVertical: 8,
   },
-
-  buttonText: {
+  dangerText: {
     color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  outline: {
+    borderColor: '#007bff',
+    borderWidth: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginVertical: 8,
+  },
+  outlineText: {
+    color: '#007bff',
     fontSize: 16,
     fontWeight: '600',
   },

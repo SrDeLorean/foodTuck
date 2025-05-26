@@ -1,131 +1,254 @@
-import React, { useState, useMemo } from 'react';
-import { View, Text, FlatList, TouchableOpacity, TextInput, RefreshControl } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, TouchableOpacity, Dimensions } from 'react-native';
 import * as Animatable from 'react-native-animatable';
+import { Picker } from '@react-native-picker/picker';
 import { tableStyles } from '../styles/tableStyles';
 
 export default function DataTable({
   columns,
   data,
   onRowPress,
-  onRefresh,
-  emptyComponent,
-  filterPlaceholder = "Filtrar...",
+  onSort,
+  sortColumn,
+  sortDirection,
   flatListRef,
+  renderEmpty,
+  refreshControl,
 }) {
-  // Estados internos
-  const [filterText, setFilterText] = useState('');
-  const [sortColumn, setSortColumn] = useState(null);
-  const [sortDirection, setSortDirection] = useState('asc');
-  const [refreshing, setRefreshing] = useState(false);
+  // Estado para guardar ancho de pantalla y actualizar al cambiar tamaño o rotar
+  const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);
 
-  const filterTextLower = filterText.toLowerCase();
+  useEffect(() => {
+    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+      setScreenWidth(window.width);
+    });
 
-  // Filtrado y ordenamiento memoizado
-  const filteredAndSortedData = useMemo(() => {
-    let filtered = data;
+    return () => {
+      subscription?.remove();
+    };
+  }, []);
 
-    if (filterText.trim() !== '') {
-      filtered = data.filter(item =>
-        columns.some(col => {
-          const value = item[col.key];
-          if (value === undefined || value === null) return false;
-          return value.toString().toLowerCase().includes(filterTextLower);
-        })
+  const isNarrowScreen = screenWidth < 600; // Umbral para considerar pantalla estrecha
+
+  const defaultItemsPerPage = isNarrowScreen ? 5 : 10;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(defaultItemsPerPage);
+
+  const totalItems = data.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+  // Data paginada según página e ítems por página
+  const paginatedData = data.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Cambiar página, evita fuera de rango y hace scroll al principio
+  const changePage = (page) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+    flatListRef?.current?.scrollToOffset({ offset: 0, animated: true });
+  };
+
+  // Cambiar cantidad de ítems por página y resetear página actual
+  const changeItemsPerPage = (num) => {
+    setItemsPerPage(num);
+    setCurrentPage(1);
+    flatListRef?.current?.scrollToOffset({ offset: 0, animated: true });
+  };
+
+  // Renderizar botones de paginación según ancho pantalla
+  const renderPaginationButtons = () => {
+    if (isNarrowScreen) {
+      const buttons = [];
+
+      buttons.push(renderPageButton(1));
+
+      if (currentPage > 3) {
+        buttons.push(
+          <Text key="start-dots" style={tableStyles.paginationDots}>...</Text>
+        );
+      }
+
+      if (currentPage !== 1 && currentPage !== totalPages) {
+        buttons.push(renderPageButton(currentPage));
+      }
+
+      if (currentPage < totalPages - 2) {
+        buttons.push(
+          <Text key="end-dots" style={tableStyles.paginationDots}>...</Text>
+        );
+      }
+
+      if (totalPages > 1) {
+        buttons.push(renderPageButton(totalPages));
+      }
+
+      return buttons;
+    }
+
+    // Comportamiento normal para pantallas anchas
+    if (totalPages <= 7) {
+      return [...Array(totalPages)].map((_, i) => renderPageButton(i + 1));
+    }
+
+    const buttons = [];
+    const addPageButton = (page) => buttons.push(renderPageButton(page));
+
+    addPageButton(1);
+
+    if (currentPage > 4) {
+      buttons.push(
+        <Text key="start-dots" style={tableStyles.paginationDots}>...</Text>
       );
     }
 
-    if (!sortColumn) return filtered;
+    const startPage = Math.max(2, currentPage - 2);
+    const endPage = Math.min(totalPages - 1, currentPage + 2);
 
-    return filtered.slice().sort((a, b) => {
-      const aVal = a[sortColumn];
-      const bVal = b[sortColumn];
-      if (aVal == null) return 1;
-      if (bVal == null) return -1;
+    for (let i = startPage; i <= endPage; i++) {
+      addPageButton(i);
+    }
 
-      if (typeof aVal === 'number' && typeof bVal === 'number') {
-        return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
-      } else {
-        return sortDirection === 'asc'
-          ? aVal.toString().localeCompare(bVal.toString())
-          : bVal.toString().localeCompare(aVal.toString());
-      }
-    });
-  }, [data, filterTextLower, sortColumn, sortDirection, columns]);
+    if (currentPage < totalPages - 3) {
+      buttons.push(
+        <Text key="end-dots" style={tableStyles.paginationDots}>...</Text>
+      );
+    }
 
-  // Controla el orden al tocar headers
+    addPageButton(totalPages);
+
+    return buttons;
+  };
+
+  // Botón individual de página con estilos activos/inactivos
+  const renderPageButton = (page) => {
+    const isActive = page === currentPage;
+    return (
+      <TouchableOpacity
+        key={page}
+        style={[
+          tableStyles.paginationPageNumber,
+          isActive && tableStyles.paginationPageNumberActive,
+        ]}
+        onPress={() => changePage(page)}
+      >
+        <Text
+          style={[
+            tableStyles.paginationPageNumberText,
+            isActive && tableStyles.paginationPageNumberTextActive,
+          ]}
+        >
+          {page}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
+
+  // Manejar ordenación de columnas
   const handleSort = (colKey) => {
-    if (sortColumn === colKey) {
-      // Cambia dirección
-      setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
-    } else {
-      setSortColumn(colKey);
-      setSortDirection('asc');
-    }
+    if (!onSort) return;
+    onSort(colKey);
   };
 
-  // Controla refresco, setea refreshing automáticamente mientras onRefresh async se ejecuta
-  const handleRefresh = async () => {
-    if (!onRefresh) return;
-    setRefreshing(true);
-    try {
-      await onRefresh();
-    } finally {
-      setRefreshing(false);
-    }
-  };
+  // Renderizar encabezado con posibilidad de ordenar columnas
+  const renderHeader = () => (
+    <View style={tableStyles.tableHeader}>
+      {columns.map((col) => (
+        <TouchableOpacity
+          key={col.key}
+          onPress={() => col.sortable && handleSort(col.key)}
+          style={[tableStyles.columnHeader, col.headerStyle]}
+          activeOpacity={col.sortable ? 0.7 : 1}
+        >
+          <Text style={tableStyles.columnHeaderText}>
+            {col.title}{' '}
+            {sortColumn === col.key ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+
+  // Renderizar fila animada, con evento al presionar
+  const renderItem = ({ item, index }) => (
+    <Animatable.View animation="fadeInUp" delay={index * 50}>
+      <TouchableOpacity
+        style={tableStyles.tableRow}
+        onPress={() => onRowPress && onRowPress(item)}
+        activeOpacity={0.7}
+      >
+        {columns.map((col) => (
+          <Text
+            key={col.key}
+            style={[tableStyles.tableCell, col.cellStyle]}
+          >
+            {col.format ? col.format(item[col.key]) : item[col.key]}
+          </Text>
+        ))}
+      </TouchableOpacity>
+    </Animatable.View>
+  );
 
   return (
     <View>
-      {/* Input filtro */}
-      <TextInput
-        style={tableStyles.searchInput}
-        placeholder={filterPlaceholder}
-        value={filterText}
-        onChangeText={setFilterText}
-        clearButtonMode="while-editing"
-      />
-
-      {/* Headers */}
-      <View style={tableStyles.tableHeader}>
-        {columns.map(col => (
-          <TouchableOpacity
-            key={col.key}
-            onPress={() => col.sortable && handleSort(col.key)}
-            style={[tableStyles.columnHeader, col.headerStyle]}
-          >
-            <Text style={tableStyles.columnHeaderText}>
-              {col.title} {sortColumn === col.key ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* Tabla con FlatList */}
+      {renderHeader()}
       <FlatList
         ref={flatListRef}
-        data={filteredAndSortedData}
-        keyExtractor={item => item.id.toString()}
-        renderItem={({ item, index }) => (
-          <Animatable.View animation="fadeInUp" delay={index * 100}>
-            <TouchableOpacity
-              style={tableStyles.tableRow}
-              onPress={() => onRowPress && onRowPress(item)}
-            >
-              {columns.map(col => (
-                <Text key={col.key} style={[tableStyles.tableCell, col.cellStyle]}>
-                  {col.format ? col.format(item[col.key]) : item[col.key]}
-                </Text>
-              ))}
-            </TouchableOpacity>
-          </Animatable.View>
-        )}
-        ListEmptyComponent={emptyComponent}
-        refreshControl={
-          onRefresh ? (
-            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-          ) : null
-        }
+        data={paginatedData}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={renderItem}
+        ListEmptyComponent={renderEmpty}
+        refreshControl={refreshControl}
+        keyboardShouldPersistTaps="handled"
       />
+
+      {/* Paginación y Picker */}
+      <View style={tableStyles.paginationContainer}>
+        {/* Botones de paginación */}
+        <View style={tableStyles.pagesWrapper}>
+          <TouchableOpacity
+            style={[
+              tableStyles.paginationButton,
+              currentPage === 1 && tableStyles.paginationButtonDisabled,
+            ]}
+            onPress={() => changePage(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            <Text style={tableStyles.paginationButtonText}>‹</Text>
+          </TouchableOpacity>
+
+          {renderPaginationButtons()}
+
+          <TouchableOpacity
+            style={[
+              tableStyles.paginationButton,
+              currentPage === totalPages && tableStyles.paginationButtonDisabled,
+            ]}
+            onPress={() => changePage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            <Text style={tableStyles.paginationButtonText}>›</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Selector de ítems por página */}
+        <View style={tableStyles.itemsPerPageWrapper}>
+          <Text style={tableStyles.itemsPerPageLabel}>Items por página:</Text>
+          <View style={tableStyles.itemsPerPagePickerWrapper}>
+            <Picker
+              selectedValue={itemsPerPage}
+              style={tableStyles.itemsPerPagePicker}
+              onValueChange={(value) => changeItemsPerPage(value)}
+              dropdownIconColor="#000"
+            >
+              {[5, 10, 15, 25, 50, 100].map((value) => (
+                <Picker.Item key={value} label={value.toString()} value={value} />
+              ))}
+            </Picker>
+          </View>
+        </View>
+      </View>
     </View>
   );
 }

@@ -1,80 +1,125 @@
 // frontend/src/services/productoService.js
 
-const mockProducts = [
-  { id: '1', name: 'Hamburguesa Clásica', description: 'Una deliciosa hamburguesa con queso, lechuga y tomate.', price: 8.99 },
-  { id: '2', name: 'Papas Fritas', description: 'Crujientes papas fritas doradas.', price: 3.49 },
-  { id: '3', name: 'Refresco Grande', description: 'Tu bebida favorita en tamaño grande.', price: 2.99 },
-  { id: '4', name: 'Nuggets de Pollo (6 piezas)', description: 'Tiernos nuggets de pollo empanizados.', price: 5.79 },
-];
+const productosSimulados = Array.from({ length: 150 }, (_, i) => {
+  const nombres = [
+    'Hamburguesa Clásica',
+    'Papas Fritas',
+    'Refresco Grande',
+    'Nuggets de Pollo (6 piezas)',
+    'Combo Familiar',
+    'Ensalada César',
+    'Sándwich de Pollo',
+    'Helado de Vainilla',
+    'Pizza Personal',
+    'Café Expreso',
+  ];
 
-let nextId = 5; // To generate new IDs for created products
+  const descripciones = [
+    'Una deliciosa opción para cualquier momento del día.',
+    'Crujientes y doradas al estilo tradicional.',
+    'Fresca, saludable y llena de sabor.',
+    'Perfecto para compartir en familia.',
+    'Una bebida refrescante para acompañar.',
+    'Postre cremoso y dulce para cerrar con broche de oro.',
+    'Caliente, fuerte y con aroma intenso.',
+    '¡Ideal para los más pequeños!',
+    'Receta especial de la casa con ingredientes frescos.',
+    'Empanizados al punto, acompañados de salsa especial.',
+  ];
 
-export const getProducts = async () => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      console.log('Mock: Fetching all products');
-      resolve([...mockProducts]); // Return a copy to avoid direct mutation outside
-    }, 800); // Simulate network delay
+  const autores = [
+    'Sebastian Ibarra',
+    'Javier Ibarra',
+    'Cachupin Ibarra',
+    'Wololoooo',
+    'Ana Torres',
+    'Luis Martínez',
+    'Majo Castillo',
+    'Camilo Pérez',
+    'Andrea Gómez',
+    'Ximena Soto',
+  ];
+
+  // Generar valores aleatorios
+  const nombre = nombres[Math.floor(Math.random() * nombres.length)];
+  const descripcion = descripciones[Math.floor(Math.random() * descripciones.length)];
+  const price = (Math.random() * 15 + 2).toFixed(2); // $2.00 - $17.00
+  const creadoPor = autores[Math.floor(Math.random() * autores.length)];
+
+  // Fecha aleatoria entre 2024-01-01 y 2024-12-31
+  const start = new Date(2024, 0, 1);
+  const end = new Date(2024, 11, 31);
+  const fecha = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+  const fechaFormateada = fecha.toLocaleDateString('es-CL');
+
+  return {
+    id: (i + 1).toString(),
+    name: nombre,
+    description: descripcion,
+    price: parseFloat(price),
+    creadoPor,
+    fecha: fechaFormateada,
+  };
+});
+
+export const getProducts = () => {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve([...productosSimulados]), 500);
   });
 };
 
-export const getProductById = async (id) => {
+export const getProductById = (id) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      console.log(`Mock: Fetching product with ID: ${id}`);
-      const product = mockProducts.find(p => p.id === id);
-      if (product) {
-        resolve({ ...product }); // Return a copy
+      const product = productosSimulados.find(p => p.id === id);
+      if (product) resolve({...product});
+      else reject('No encontrado');
+    }, 500);
+  });
+};
+
+export const createProduct = (product) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const newProduct = {
+        ...product,
+        id: productosSimulados.length ? productosSimulados[productosSimulados.length - 1].id + 1 : 1,
+        creadoPor: 'Simulado',
+        fecha: new Date().toISOString().slice(0, 10),
+      };
+      productosSimulados.push(newProduct);
+      resolve(newProduct);
+    }, 500);
+  });
+};
+
+export const updateProduct = (id, updatedProduct) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const index = productosSimulados.findIndex(p => p.id === id);
+      if (index >= 0) {
+        productosSimulados[index] = {
+          ...productosSimulados[index],
+          ...updatedProduct,
+        };
+        resolve(productosSimulados[index]);
       } else {
-        reject(new Error(`Mock: Product with ID ${id} not found.`));
+        reject('No encontrado');
       }
-    }, 600); // Simulate network delay
+    }, 500);
   });
 };
 
-export const createProduct = async (productData) => {
+export const deleteProduct = (id) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      console.log('Mock: Creating product', productData);
-      const newProduct = { id: (nextId++).toString(), ...productData };
-      mockProducts.push(newProduct);
-      resolve({ message: 'Mock: Producto creado exitosamente', product: newProduct });
-    }, 1000); // Simulate network delay
-  });
-};
-
-export const updateProduct = async (id, updatedData) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      console.log(`Mock: Updating product with ID: ${id}`, updatedData);
-      const index = mockProducts.findIndex(p => p.id === id);
-      if (index !== -1) {
-        // Create a new product object with updated data
-        const updatedProduct = { ...mockProducts[index], ...updatedData, id: id };
-        // Replace the old product in the array
-        mockProducts[index] = updatedProduct;
-        resolve({ message: `Mock: Producto con ID ${id} actualizado.`, product: updatedProduct });
+      const index = productosSimulados.findIndex(p => p.id === id);
+      if (index >= 0) {
+        productosSimulados.splice(index, 1);
+        resolve(true);
       } else {
-        reject(new Error(`Mock: Producto con ID ${id} no encontrado para actualizar.`));
+        reject('No encontrado');
       }
-    }, 800); // Simulate network delay
-  });
-};
-
-export const deleteProduct = async (id) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      console.log(`Mock: Deleting product with ID: ${id}`);
-      const initialLength = mockProducts.length;
-      // Filter out the product to simulate deletion
-      const updatedProducts = mockProducts.filter(p => p.id !== id);
-      if (updatedProducts.length < initialLength) {
-        // Update the mock array in place or reassign (filter returns a new array)
-         mockProducts.splice(0, mockProducts.length, ...updatedProducts); // Efficient way to replace array contents
-        resolve({ message: `Mock: Producto con ID ${id} eliminado.` });
-      } else {
-        reject(new Error(`Mock: Producto con ID ${id} no encontrado para eliminar.`));
-      }
-    }, 700); // Simulate network delay
+    }, 500);
   });
 };
