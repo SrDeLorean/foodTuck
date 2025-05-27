@@ -5,6 +5,7 @@ import GuestHome from '../../views/guest/GuestHome';
 import ProductoList from '../../views/producto/ProductoListScreen';
 import LoginScreen from '../../views/auth/LoginScreen';
 import RegisterScreen from '../../views/auth/RegisterScreen';
+import RecoverPasswordScreen from '../../views/auth/RecoverPasswordScreen';
 
 import CustomDrawerContent from '../CustomDrawerContent';
 
@@ -40,6 +41,14 @@ export default function GuestNavigator() {
         component={RegisterScreen}
         options={{ drawerItemStyle: { display: 'none' } }}
       />
+
+      <Drawer.Screen
+        name="RecoverPasswordScreen"
+        component={RecoverPasswordScreen}
+        options={{ drawerItemStyle: { display: 'none' } }}
+      />
     </Drawer.Navigator>
+
+    
   );
 }

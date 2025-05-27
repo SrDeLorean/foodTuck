@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+} from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { Picker } from '@react-native-picker/picker';
 import { tableStyles } from '../styles/tableStyles';
@@ -15,49 +23,45 @@ export default function DataTable({
   renderEmpty,
   refreshControl,
 }) {
-  // Estado para guardar ancho de pantalla y actualizar al cambiar tamaño o rotar
   const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);
+  const [screenHeight, setScreenHeight] = useState(Dimensions.get('window').height);
 
   useEffect(() => {
     const subscription = Dimensions.addEventListener('change', ({ window }) => {
       setScreenWidth(window.width);
+      setScreenHeight(window.height);
     });
-
     return () => {
       subscription?.remove();
     };
   }, []);
 
-  const isNarrowScreen = screenWidth < 600; // Umbral para considerar pantalla estrecha
+  const isNarrowScreen = screenWidth < 600;
 
   const defaultItemsPerPage = isNarrowScreen ? 5 : 10;
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(defaultItemsPerPage);
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [itemsPerPage, setItemsPerPage] = React.useState(defaultItemsPerPage);
 
   const totalItems = data.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  // Data paginada según página e ítems por página
   const paginatedData = data.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  // Cambiar página, evita fuera de rango y hace scroll al principio
   const changePage = (page) => {
     if (page < 1 || page > totalPages) return;
     setCurrentPage(page);
     flatListRef?.current?.scrollToOffset({ offset: 0, animated: true });
   };
 
-  // Cambiar cantidad de ítems por página y resetear página actual
   const changeItemsPerPage = (num) => {
     setItemsPerPage(num);
     setCurrentPage(1);
     flatListRef?.current?.scrollToOffset({ offset: 0, animated: true });
   };
 
-  // Renderizar botones de paginación según ancho pantalla
   const renderPaginationButtons = () => {
     if (isNarrowScreen) {
       const buttons = [];
@@ -66,7 +70,9 @@ export default function DataTable({
 
       if (currentPage > 3) {
         buttons.push(
-          <Text key="start-dots" style={tableStyles.paginationDots}>...</Text>
+          <Text key="start-dots" style={tableStyles.paginationDots}>
+            ...
+          </Text>
         );
       }
 
@@ -76,7 +82,9 @@ export default function DataTable({
 
       if (currentPage < totalPages - 2) {
         buttons.push(
-          <Text key="end-dots" style={tableStyles.paginationDots}>...</Text>
+          <Text key="end-dots" style={tableStyles.paginationDots}>
+            ...
+          </Text>
         );
       }
 
@@ -87,7 +95,6 @@ export default function DataTable({
       return buttons;
     }
 
-    // Comportamiento normal para pantallas anchas
     if (totalPages <= 7) {
       return [...Array(totalPages)].map((_, i) => renderPageButton(i + 1));
     }
@@ -99,7 +106,9 @@ export default function DataTable({
 
     if (currentPage > 4) {
       buttons.push(
-        <Text key="start-dots" style={tableStyles.paginationDots}>...</Text>
+        <Text key="start-dots" style={tableStyles.paginationDots}>
+          ...
+        </Text>
       );
     }
 
@@ -112,7 +121,9 @@ export default function DataTable({
 
     if (currentPage < totalPages - 3) {
       buttons.push(
-        <Text key="end-dots" style={tableStyles.paginationDots}>...</Text>
+        <Text key="end-dots" style={tableStyles.paginationDots}>
+          ...
+        </Text>
       );
     }
 
@@ -121,7 +132,6 @@ export default function DataTable({
     return buttons;
   };
 
-  // Botón individual de página con estilos activos/inactivos
   const renderPageButton = (page) => {
     const isActive = page === currentPage;
     return (
@@ -145,13 +155,11 @@ export default function DataTable({
     );
   };
 
-  // Manejar ordenación de columnas
   const handleSort = (colKey) => {
     if (!onSort) return;
     onSort(colKey);
   };
 
-  // Renderizar encabezado con posibilidad de ordenar columnas
   const renderHeader = () => (
     <View style={tableStyles.tableHeader}>
       {columns.map((col) => (
@@ -170,7 +178,6 @@ export default function DataTable({
     </View>
   );
 
-  // Renderizar fila animada, con evento al presionar
   const renderItem = ({ item, index }) => (
     <Animatable.View animation="fadeInUp" delay={index * 50}>
       <TouchableOpacity
@@ -179,10 +186,7 @@ export default function DataTable({
         activeOpacity={0.7}
       >
         {columns.map((col) => (
-          <Text
-            key={col.key}
-            style={[tableStyles.tableCell, col.cellStyle]}
-          >
+          <Text key={col.key} style={[tableStyles.tableCell, col.cellStyle]}>
             {col.format ? col.format(item[col.key]) : item[col.key]}
           </Text>
         ))}
@@ -191,21 +195,28 @@ export default function DataTable({
   );
 
   return (
-    <View>
-      {renderHeader()}
-      <FlatList
-        ref={flatListRef}
-        data={paginatedData}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderItem}
-        ListEmptyComponent={renderEmpty}
-        refreshControl={refreshControl}
-        keyboardShouldPersistTaps="handled"
-      />
+    <View style={styles.container}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={true}
+        style={styles.horizontalScroll}
+      >
+        <View style={[styles.tableWrapper, { minWidth: screenWidth }]}>
+          {renderHeader()}
+          <FlatList
+            ref={flatListRef}
+            data={paginatedData}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderItem}
+            ListEmptyComponent={renderEmpty}
+            refreshControl={refreshControl}
+            keyboardShouldPersistTaps="handled"
+            style={styles.flatList}
+          />
+        </View>
+      </ScrollView>
 
-      {/* Paginación y Picker */}
       <View style={tableStyles.paginationContainer}>
-        {/* Botones de paginación */}
         <View style={tableStyles.pagesWrapper}>
           <TouchableOpacity
             style={[
@@ -232,7 +243,6 @@ export default function DataTable({
           </TouchableOpacity>
         </View>
 
-        {/* Selector de ítems por página */}
         <View style={tableStyles.itemsPerPageWrapper}>
           <Text style={tableStyles.itemsPerPageLabel}>Items por página:</Text>
           <View style={tableStyles.itemsPerPagePickerWrapper}>
@@ -252,3 +262,18 @@ export default function DataTable({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1, // Ocupa todo el espacio disponible
+  },
+  horizontalScroll: {
+    flexGrow: 0,
+  },
+  tableWrapper: {
+    flex: 1,
+  },
+  flatList: {
+    flexGrow: 0,
+  },
+});
