@@ -7,6 +7,7 @@ import {
   Dimensions,
   ScrollView,
   StyleSheet,
+  TextInput,
 } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { Picker } from '@react-native-picker/picker';
@@ -16,9 +17,6 @@ export default function DataTable({
   columns,
   data,
   onRowPress,
-  onSort,
-  sortColumn,
-  sortDirection,
   flatListRef,
   renderEmpty,
   refreshControl,
@@ -37,15 +35,56 @@ export default function DataTable({
   }, []);
 
   const isNarrowScreen = screenWidth < 600;
-
   const defaultItemsPerPage = isNarrowScreen ? 5 : 10;
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const [itemsPerPage, setItemsPerPage] = React.useState(defaultItemsPerPage);
 
-  const totalItems = data.length;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(defaultItemsPerPage);
+  const [searchText, setSearchText] = useState('');
+  const [searchColumn, setSearchColumn] = useState('all');
+  const [sortColumn, setSortColumn] = useState(null);
+  const [sortDirection, setSortDirection] = useState('asc');
+  const [lastSortedAt, setLastSortedAt] = useState(null);
+
+  const handleSort = (colKey) => {
+    if (sortColumn === colKey) {
+      const newDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+      setSortDirection(newDirection);
+    } else {
+      setSortColumn(colKey);
+      setSortDirection('asc');
+    }
+    setLastSortedAt(new Date());
+  };
+
+  const filteredData = data
+    .filter((item) => {
+      if (!searchText) return true;
+      if (searchColumn === 'all') {
+        return columns.some((col) =>
+          item[col.key]?.toString().toLowerCase().includes(searchText.toLowerCase())
+        );
+      } else {
+        return item[searchColumn]?.toString().toLowerCase().includes(searchText.toLowerCase());
+      }
+    })
+    .sort((a, b) => {
+      if (!sortColumn) return 0;
+      const valA = a[sortColumn];
+      const valB = b[sortColumn];
+      if (typeof valA === 'number' && typeof valB === 'number') {
+        return sortDirection === 'asc' ? valA - valB : valB - valA;
+      }
+      const strA = valA?.toString().toLowerCase();
+      const strB = valB?.toString().toLowerCase();
+      if (strA < strB) return sortDirection === 'asc' ? -1 : 1;
+      if (strA > strB) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+  const totalItems = filteredData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  const paginatedData = data.slice(
+  const paginatedData = filteredData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -63,101 +102,62 @@ export default function DataTable({
   };
 
   const renderPaginationButtons = () => {
-    if (isNarrowScreen) {
-      const buttons = [];
-
-      buttons.push(renderPageButton(1));
-
-      if (currentPage > 3) {
-        buttons.push(
-          <Text key="start-dots" style={tableStyles.paginationDots}>
-            ...
+    const buttons = [];
+    const renderPageButton = (page) => {
+      const isActive = page === currentPage;
+      return (
+        <TouchableOpacity
+          key={page}
+          style={[
+            tableStyles.paginationPageNumber,
+            isActive && tableStyles.paginationPageNumberActive,
+          ]}
+          onPress={() => changePage(page)}
+        >
+          <Text
+            style={[
+              tableStyles.paginationPageNumberText,
+              isActive && tableStyles.paginationPageNumberTextActive,
+            ]}
+          >
+            {page}
           </Text>
-        );
-      }
+        </TouchableOpacity>
+      );
+    };
 
+    if (isNarrowScreen) {
+      buttons.push(renderPageButton(1));
+      if (currentPage > 3) {
+        buttons.push(<Text key="start-dots" style={tableStyles.paginationDots}>...</Text>);
+      }
       if (currentPage !== 1 && currentPage !== totalPages) {
         buttons.push(renderPageButton(currentPage));
       }
-
       if (currentPage < totalPages - 2) {
-        buttons.push(
-          <Text key="end-dots" style={tableStyles.paginationDots}>
-            ...
-          </Text>
-        );
+        buttons.push(<Text key="end-dots" style={tableStyles.paginationDots}>...</Text>);
       }
-
       if (totalPages > 1) {
         buttons.push(renderPageButton(totalPages));
       }
-
-      return buttons;
+    } else {
+      const addPageButton = (page) => buttons.push(renderPageButton(page));
+      addPageButton(1);
+      if (currentPage > 4) {
+        buttons.push(<Text key="start-dots" style={tableStyles.paginationDots}>...</Text>);
+      }
+      const startPage = Math.max(2, currentPage - 2);
+      const endPage = Math.min(totalPages - 1, currentPage + 2);
+      for (let i = startPage; i <= endPage; i++) {
+        addPageButton(i);
+      }
+      if (currentPage < totalPages - 3) {
+        buttons.push(<Text key="end-dots" style={tableStyles.paginationDots}>...</Text>);
+      }
+      addPageButton(totalPages);
     }
-
-    if (totalPages <= 7) {
-      return [...Array(totalPages)].map((_, i) => renderPageButton(i + 1));
-    }
-
-    const buttons = [];
-    const addPageButton = (page) => buttons.push(renderPageButton(page));
-
-    addPageButton(1);
-
-    if (currentPage > 4) {
-      buttons.push(
-        <Text key="start-dots" style={tableStyles.paginationDots}>
-          ...
-        </Text>
-      );
-    }
-
-    const startPage = Math.max(2, currentPage - 2);
-    const endPage = Math.min(totalPages - 1, currentPage + 2);
-
-    for (let i = startPage; i <= endPage; i++) {
-      addPageButton(i);
-    }
-
-    if (currentPage < totalPages - 3) {
-      buttons.push(
-        <Text key="end-dots" style={tableStyles.paginationDots}>
-          ...
-        </Text>
-      );
-    }
-
-    addPageButton(totalPages);
 
     return buttons;
-  };
-
-  const renderPageButton = (page) => {
-    const isActive = page === currentPage;
-    return (
-      <TouchableOpacity
-        key={page}
-        style={[
-          tableStyles.paginationPageNumber,
-          isActive && tableStyles.paginationPageNumberActive,
-        ]}
-        onPress={() => changePage(page)}
-      >
-        <Text
-          style={[
-            tableStyles.paginationPageNumberText,
-            isActive && tableStyles.paginationPageNumberTextActive,
-          ]}
-        >
-          {page}
-        </Text>
-      </TouchableOpacity>
-    );
-  };
-
-  const handleSort = (colKey) => {
-    if (!onSort) return;
-    onSort(colKey);
   };
 
   const renderHeader = () => (
@@ -194,14 +194,47 @@ export default function DataTable({
     </Animatable.View>
   );
 
+  // Estimación del ancho total de la tabla sumando anchos fijos o flexibles
+  // Para simplificar, usamos valores fijos para columnas (puedes ajustar según tus estilos)
+  // Ejemplo: si usas flex, suma un valor promedio por columna (por ejemplo 100)
+  // Aquí asumimos 100 por columna como estimado, o usa col.width si lo defines
+  const tableWidthEstimate = columns.reduce((acc, col) => {
+    if (col.width) return acc + col.width;
+    return acc + 100; // valor por defecto estimado
+  }, 0);
+
   return (
     <View style={styles.container}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={true}
-        style={styles.horizontalScroll}
-      >
-        <View style={[styles.tableWrapper, { minWidth: screenWidth }]}>
+      <View style={styles.filterContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Buscar..."
+          value={searchText}
+          onChangeText={setSearchText}
+        />
+      </View>
+
+      {tableWidthEstimate > screenWidth ? (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator
+          contentContainerStyle={{ flexGrow: 1 }}
+        >
+          <View style={{ minWidth: tableWidthEstimate }}>
+            {renderHeader()}
+            <FlatList
+              ref={flatListRef}
+              data={paginatedData}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={renderItem}
+              ListEmptyComponent={renderEmpty}
+              refreshControl={refreshControl}
+              keyboardShouldPersistTaps="handled"
+            />
+          </View>
+        </ScrollView>
+      ) : (
+        <View>
           {renderHeader()}
           <FlatList
             ref={flatListRef}
@@ -211,10 +244,15 @@ export default function DataTable({
             ListEmptyComponent={renderEmpty}
             refreshControl={refreshControl}
             keyboardShouldPersistTaps="handled"
-            style={styles.flatList}
           />
         </View>
-      </ScrollView>
+      )}
+
+      {lastSortedAt && (
+        <Text style={{ textAlign: 'center', marginTop: 8, color: '#666' }}>
+          Última ordenación: {lastSortedAt.toLocaleString()}
+        </Text>
+      )}
 
       <View style={tableStyles.paginationContainer}>
         <View style={tableStyles.pagesWrapper}>
@@ -226,7 +264,7 @@ export default function DataTable({
             onPress={() => changePage(currentPage - 1)}
             disabled={currentPage === 1}
           >
-            <Text style={tableStyles.paginationButtonText}>‹</Text>
+            <Text style={tableStyles.paginationButtonText}>{'‹'}</Text>
           </TouchableOpacity>
 
           {renderPaginationButtons()}
@@ -239,24 +277,22 @@ export default function DataTable({
             onPress={() => changePage(currentPage + 1)}
             disabled={currentPage === totalPages}
           >
-            <Text style={tableStyles.paginationButtonText}>›</Text>
+            <Text style={tableStyles.paginationButtonText}>{'›'}</Text>
           </TouchableOpacity>
         </View>
 
         <View style={tableStyles.itemsPerPageWrapper}>
           <Text style={tableStyles.itemsPerPageLabel}>Items por página:</Text>
-          <View style={tableStyles.itemsPerPagePickerWrapper}>
-            <Picker
-              selectedValue={itemsPerPage}
-              style={tableStyles.itemsPerPagePicker}
-              onValueChange={(value) => changeItemsPerPage(value)}
-              dropdownIconColor="#000"
-            >
-              {[5, 10, 15, 25, 50, 100].map((value) => (
-                <Picker.Item key={value} label={value.toString()} value={value} />
-              ))}
-            </Picker>
-          </View>
+          <Picker
+            selectedValue={itemsPerPage}
+            style={tableStyles.picker}
+            onValueChange={(value) => changeItemsPerPage(value)}
+            mode="dropdown"
+          >
+            {[5, 10, 15, 20, 25, 50].map((num) => (
+              <Picker.Item key={num} label={num.toString()} value={num} />
+            ))}
+          </Picker>
         </View>
       </View>
     </View>
@@ -265,15 +301,20 @@ export default function DataTable({
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, // Ocupa todo el espacio disponible
-  },
-  horizontalScroll: {
-    flexGrow: 0,
-  },
-  tableWrapper: {
     flex: 1,
+    paddingHorizontal: 8,
+    paddingTop: 12,
   },
-  flatList: {
-    flexGrow: 0,
+  filterContainer: {
+    marginBottom: 12,
+  },
+  searchInput: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 8,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
 });
