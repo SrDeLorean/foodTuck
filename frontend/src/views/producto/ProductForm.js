@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
-import { formStyles } from '../../styles/formStyles';
-import { inputStyles } from '../../styles/inputStyles';
+import { formStyles } from '../../styles/components/formStyles';
+import { inputStyles } from '../../styles/components/inputStyles';
 
 function validateProduct({ name, price }) {
   const errors = {};

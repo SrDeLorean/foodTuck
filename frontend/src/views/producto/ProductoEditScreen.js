@@ -4,7 +4,7 @@ import { KeyboardAvoidingView, Platform, ActivityIndicator, View } from 'react-n
 import Toast from 'react-native-toast-message';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import ProductForm from './ProductForm';
-import { formStyles } from '../../styles/formStyles';
+import { formStyles } from '../../styles/components/formStyles';
 import { getProductById, updateProduct } from '../../services/productoService';
 import CardScrollView from '../../components/CardScrollView';
 

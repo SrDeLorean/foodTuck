@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { Picker } from '@react-native-picker/picker';
-import { tableStyles } from '../styles/tableStyles';
+import { tableStyles } from '../styles/components/tableStyles';
 
 export default function DataTable({
   columns,

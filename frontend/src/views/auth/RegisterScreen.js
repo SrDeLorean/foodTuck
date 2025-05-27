@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { View, TextInput, TouchableOpacity, Text, Alert, ScrollView, Image } from 'react-native';
 import Checkbox from 'expo-checkbox';
 import { AuthContext } from '../../context/AuthContext';
-import styles from '../../styles/authStyles';
+import styles from '../../styles/screens/authStyles';
 
 export default function RegisterScreen({ navigation }) {
   const [fullName, setFullName] = useState('');

@@ -1,4 +1,4 @@
-// /styles/formStyles.js
+// /styles/components/formStyle.js
 import { StyleSheet } from 'react-native';
 
 export const formStyles = StyleSheet.create({

@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { AuthContext } from '../../context/AuthContext';
-import styles from '../../styles/authStyles';
+import styles from '../../styles/screens/authStyles';
 
 export default function RecoverPasswordScreen({ navigation }) {
   const [email, setEmail] = useState('');

@@ -1,3 +1,4 @@
+//src/styles/components/tableStyles.js
 import { StyleSheet, Platform } from 'react-native';
 
 export const tableStyles = StyleSheet.create({

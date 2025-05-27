@@ -9,7 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import { getProducts } from '../../services/productoService';
 import DataTable from '../../components/DataTable';
-import { tableStyles } from '../../styles/tableStyles';
+import { tableStyles } from '../../styles/components/tableStyles';
 import CardScrollView from '../../components/CardScrollView';
 import { useFetch } from '../../hooks/useFetch';
 

@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { formStyles } from '../../styles/formStyles';
+import { formStyles } from '../../styles/components/formStyles';
 import { getProductById } from '../../services/productoService';
 import CardScrollView from '../../components/CardScrollView';
 import { useFetchById } from '../../hooks/useFetchById';
