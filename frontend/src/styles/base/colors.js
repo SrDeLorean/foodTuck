@@ -12,4 +12,11 @@ export default {
     textLight: '#666666',
   
     borderLight: '#ccc',
+
+    error: '#dc3545',
+    info: '#17a2b8',
+    warning: '#ffc107',
+    success: '#28a745',
+    muted: '#666666',
+    disabled: '#cccccc',
   };

@@ -1,6 +1,11 @@
 // src/components/CardScrollView.js
 import React from 'react';
 import { ScrollView, View, StyleSheet } from 'react-native';
+import colors from '../styles/base/colors';
+import spacing from '../styles/base/spacing';
+import metrics from '../styles/base/metrics';
+import borders from '../styles/base/borders';
+import shadows from '../styles/base/shadows';
 
 export default function CardScrollView({ children }) {
   return (
@@ -18,17 +23,13 @@ export default function CardScrollView({ children }) {
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
-    backgroundColor: '#f0f0f0', // Fondo gris
-    padding: 12,
+    backgroundColor: colors.backgroundLight,
+    padding: metrics.basePadding,
   },
   card: {
-    backgroundColor: '#fff', // Carta blanca
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4, // Para Android
+    backgroundColor: colors.white,
+    borderRadius: borders.radius.base,
+    padding: spacing.lg,
+    ...shadows.light,
   },
 });

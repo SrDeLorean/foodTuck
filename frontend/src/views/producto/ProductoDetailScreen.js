@@ -12,6 +12,7 @@ import { formStyles } from '../../styles/components/formStyles';
 import { getProductById } from '../../services/productoService';
 import CardScrollView from '../../components/CardScrollView';
 import { useFetchById } from '../../hooks/useFetchById';
+import colors from '../../styles/base/colors';
 
 export default function ProductoDetailScreen() {
   const navigation = useNavigation();
@@ -22,7 +23,7 @@ export default function ProductoDetailScreen() {
   if (loading) {
     return (
       <View style={formStyles.container}>
-        <ActivityIndicator size="large" color="#007bff" />
+        <ActivityIndicator size="large" color={colors.primaryBlue} />
       </View>
     );
   }
@@ -51,7 +52,7 @@ export default function ProductoDetailScreen() {
         </View>
 
         <View style={formStyles.detailRow}>
-          <Text style={formStyles.detailLabel}>fecha de creación:</Text>
+          <Text style={formStyles.detailLabel}>Fecha de creación:</Text>
           <Text style={formStyles.detailValue}>{product.fecha}</Text>
         </View>
 

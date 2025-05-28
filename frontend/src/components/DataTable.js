@@ -1,3 +1,4 @@
+// src/components/DataTable.js
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -6,12 +7,15 @@ import {
   TouchableOpacity,
   Dimensions,
   ScrollView,
-  StyleSheet,
   TextInput,
 } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { Picker } from '@react-native-picker/picker';
 import { tableStyles } from '../styles/components/tableStyles';
+import spacing from '../styles/base/spacing';
+import colors from '../styles/base/colors';
+import fonts from '../styles/base/fonts';
+import borders from '../styles/base/borders';
 
 export default function DataTable({
   columns,
@@ -118,6 +122,7 @@ export default function DataTable({
             style={[
               tableStyles.paginationPageNumberText,
               isActive && tableStyles.paginationPageNumberTextActive,
+              { fontFamily: fonts.families.regular },
             ]}
           >
             {page}
@@ -128,32 +133,38 @@ export default function DataTable({
 
     if (isNarrowScreen) {
       buttons.push(renderPageButton(1));
-      if (currentPage > 3) {
-        buttons.push(<Text key="start-dots" style={tableStyles.paginationDots}>...</Text>);
-      }
-      if (currentPage !== 1 && currentPage !== totalPages) {
-        buttons.push(renderPageButton(currentPage));
-      }
-      if (currentPage < totalPages - 2) {
-        buttons.push(<Text key="end-dots" style={tableStyles.paginationDots}>...</Text>);
-      }
-      if (totalPages > 1) {
-        buttons.push(renderPageButton(totalPages));
-      }
+      if (currentPage > 3)
+        buttons.push(
+          <Text key="start-dots" style={[tableStyles.paginationDots, { fontFamily: fonts.families.regular }]}>
+            ...
+          </Text>
+        );
+      if (currentPage !== 1 && currentPage !== totalPages) buttons.push(renderPageButton(currentPage));
+      if (currentPage < totalPages - 2)
+        buttons.push(
+          <Text key="end-dots" style={[tableStyles.paginationDots, { fontFamily: fonts.families.regular }]}>
+            ...
+          </Text>
+        );
+      if (totalPages > 1) buttons.push(renderPageButton(totalPages));
     } else {
       const addPageButton = (page) => buttons.push(renderPageButton(page));
       addPageButton(1);
-      if (currentPage > 4) {
-        buttons.push(<Text key="start-dots" style={tableStyles.paginationDots}>...</Text>);
-      }
-      const startPage = Math.max(2, currentPage - 2);
-      const endPage = Math.min(totalPages - 1, currentPage + 2);
-      for (let i = startPage; i <= endPage; i++) {
+      if (currentPage > 4)
+        buttons.push(
+          <Text key="start-dots" style={[tableStyles.paginationDots, { fontFamily: fonts.families.regular }]}>
+            ...
+          </Text>
+        );
+      for (let i = Math.max(2, currentPage - 2); i <= Math.min(totalPages - 1, currentPage + 2); i++) {
         addPageButton(i);
       }
-      if (currentPage < totalPages - 3) {
-        buttons.push(<Text key="end-dots" style={tableStyles.paginationDots}>...</Text>);
-      }
+      if (currentPage < totalPages - 3)
+        buttons.push(
+          <Text key="end-dots" style={[tableStyles.paginationDots, { fontFamily: fonts.families.regular }]}>
+            ...
+          </Text>
+        );
       addPageButton(totalPages);
     }
 
@@ -169,7 +180,7 @@ export default function DataTable({
           style={[tableStyles.columnHeader, col.headerStyle]}
           activeOpacity={col.sortable ? 0.7 : 1}
         >
-          <Text style={tableStyles.columnHeaderText}>
+          <Text style={[tableStyles.columnHeaderText, { fontFamily: fonts.families.semiBold }]}>
             {col.title}{' '}
             {sortColumn === col.key ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
           </Text>
@@ -186,7 +197,7 @@ export default function DataTable({
         activeOpacity={0.7}
       >
         {columns.map((col) => (
-          <Text key={col.key} style={[tableStyles.tableCell, col.cellStyle]}>
+          <Text key={col.key} style={[tableStyles.tableCell, col.cellStyle, { fontFamily: fonts.families.regular }]}>
             {col.format ? col.format(item[col.key]) : item[col.key]}
           </Text>
         ))}
@@ -194,20 +205,22 @@ export default function DataTable({
     </Animatable.View>
   );
 
-  // Estimación del ancho total de la tabla sumando anchos fijos o flexibles
-  // Para simplificar, usamos valores fijos para columnas (puedes ajustar según tus estilos)
-  // Ejemplo: si usas flex, suma un valor promedio por columna (por ejemplo 100)
-  // Aquí asumimos 100 por columna como estimado, o usa col.width si lo defines
-  const tableWidthEstimate = columns.reduce((acc, col) => {
-    if (col.width) return acc + col.width;
-    return acc + 100; // valor por defecto estimado
-  }, 0);
+  const tableWidthEstimate = columns.reduce((acc, col) => acc + (col.width || 100), 0);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.filterContainer}>
+    <View style={{ flex: 1, paddingHorizontal: spacing.sm, paddingTop: spacing.md }}>
+      <View style={{ marginBottom: spacing.md }}>
         <TextInput
-          style={styles.searchInput}
+          style={{
+            backgroundColor: colors.white,
+            paddingHorizontal: spacing.md,
+            paddingVertical: spacing.sm,
+            borderRadius: borders.radius.base,
+            fontSize: fonts.sizes.medium,
+            borderWidth: borders.width.thin,
+            borderColor: colors.borderLight,
+            fontFamily: fonts.families.regular,
+          }}
           placeholder="Buscar..."
           value={searchText}
           onChangeText={setSearchText}
@@ -215,11 +228,7 @@ export default function DataTable({
       </View>
 
       {tableWidthEstimate > screenWidth ? (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator
-          contentContainerStyle={{ flexGrow: 1 }}
-        >
+        <ScrollView horizontal showsHorizontalScrollIndicator contentContainerStyle={{ flexGrow: 1 }}>
           <View style={{ minWidth: tableWidthEstimate }}>
             {renderHeader()}
             <FlatList
@@ -249,7 +258,14 @@ export default function DataTable({
       )}
 
       {lastSortedAt && (
-        <Text style={{ textAlign: 'center', marginTop: 8, color: '#666' }}>
+        <Text
+          style={{
+            textAlign: 'center',
+            marginTop: spacing.sm,
+            color: colors.textMedium,
+            fontFamily: fonts.families.regular,
+          }}
+        >
           Última ordenación: {lastSortedAt.toLocaleString()}
         </Text>
       )}
@@ -264,7 +280,9 @@ export default function DataTable({
             onPress={() => changePage(currentPage - 1)}
             disabled={currentPage === 1}
           >
-            <Text style={tableStyles.paginationButtonText}>{'‹'}</Text>
+            <Text style={[tableStyles.paginationButtonText, { fontFamily: fonts.families.regular }]}>
+              {'‹'}
+            </Text>
           </TouchableOpacity>
 
           {renderPaginationButtons()}
@@ -277,12 +295,16 @@ export default function DataTable({
             onPress={() => changePage(currentPage + 1)}
             disabled={currentPage === totalPages}
           >
-            <Text style={tableStyles.paginationButtonText}>{'›'}</Text>
+            <Text style={[tableStyles.paginationButtonText, { fontFamily: fonts.families.regular }]}>
+              {'›'}
+            </Text>
           </TouchableOpacity>
         </View>
 
         <View style={tableStyles.itemsPerPageWrapper}>
-          <Text style={tableStyles.itemsPerPageLabel}>Items por página:</Text>
+          <Text style={[tableStyles.itemsPerPageLabel, { fontFamily: fonts.families.regular }]}>
+            Items por página:
+          </Text>
           <Picker
             selectedValue={itemsPerPage}
             style={tableStyles.picker}
@@ -298,23 +320,3 @@ export default function DataTable({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 8,
-    paddingTop: 12,
-  },
-  filterContainer: {
-    marginBottom: 12,
-  },
-  searchInput: {
-    backgroundColor: '#fff',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 8,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-});

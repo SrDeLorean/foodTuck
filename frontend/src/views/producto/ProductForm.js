@@ -1,7 +1,10 @@
+// src/views/producto/ProductForm.js
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { formStyles } from '../../styles/components/formStyles';
-import { inputStyles } from '../../styles/components/inputStyles';
+import inputStyles from '../../styles/components/inputStyles';
+import textStyles from '../../styles/components/textStyles';
+import spacing from '../../styles/base/spacing';
 
 function validateProduct({ name, price }) {
   const errors = {};
@@ -12,7 +15,7 @@ function validateProduct({ name, price }) {
 
 function ErrorMessage({ message }) {
   return (
-    <Text style={message ? formStyles.errorText : formStyles.errorPlaceholder}>
+    <Text style={formStyles.errorText}>
       {message || ' '}
     </Text>
   );
@@ -37,19 +40,19 @@ export default function ProductForm({ onSubmit, initialValues = {} }) {
   };
 
   return (
-    <View style={formStyles.form}>
-      <Text style={formStyles.label}>Nombre</Text>
+    <View style={formStyles.container}>
+      <Text style={[textStyles.text, { marginBottom: spacing.xs }]}>Nombre</Text>
       <TextInput
-        style={[inputStyles.input, errors.name && inputStyles.inputError]}
+        style={[inputStyles.inputContainer, errors.name && inputStyles.inputError]}
         placeholder="Nombre del producto"
         value={name}
         onChangeText={setName}
       />
       <ErrorMessage message={errors.name} />
 
-      <Text style={formStyles.label}>Precio</Text>
+      <Text style={[textStyles.text, { marginBottom: spacing.xs }]}>Precio</Text>
       <TextInput
-        style={[inputStyles.input, errors.price && inputStyles.inputError]}
+        style={[inputStyles.inputContainer, errors.price && inputStyles.inputError]}
         placeholder="Precio"
         value={price}
         onChangeText={setPrice}

@@ -1,6 +1,6 @@
 // src/views/producto/ProductoEditScreen.js
 import React, { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Platform, ActivityIndicator, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ActivityIndicator, View, Text } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import ProductForm from './ProductForm';
@@ -17,25 +17,25 @@ export default function ProductoEditScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchProduct();
-  }, []);
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        const data = await getProductById(productId);
+        setProduct(data);
+      } catch (error) {
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: 'No se pudo cargar el producto 😓',
+        });
+        navigation.goBack();
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const fetchProduct = async () => {
-    try {
-      setLoading(true);
-      const data = await getProductById(productId);
-      setProduct(data);
-    } catch (error) {
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: 'No se pudo cargar el producto 😓',
-      });
-      navigation.goBack();
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchProduct();
+  }, [productId]);
 
   const handleUpdate = async (updatedProduct) => {
     try {
@@ -46,7 +46,8 @@ export default function ProductoEditScreen() {
         text2: `${updatedProduct.name} fue modificado exitosamente 🎉`,
       });
       navigation.goBack();
-    } catch {
+    } catch (error) {
+      console.error('Update product error:', error);
       Toast.show({
         type: 'error',
         text1: 'Error',
@@ -57,8 +58,9 @@ export default function ProductoEditScreen() {
 
   if (loading) {
     return (
-      <View style={formStyles.container}>
+      <View style={[formStyles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <ActivityIndicator size="large" color="#007bff" />
+        <Text style={{ marginTop: 10 }}>Cargando producto...</Text>
       </View>
     );
   }
@@ -67,6 +69,7 @@ export default function ProductoEditScreen() {
     <CardScrollView>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={{ flex: 1 }}
       >
         <ProductForm onSubmit={handleUpdate} initialData={product} />
       </KeyboardAvoidingView>

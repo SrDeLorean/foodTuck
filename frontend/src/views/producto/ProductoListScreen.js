@@ -1,9 +1,10 @@
+// src/screens/productos/ProductoListScreen.js
 import React, { useRef } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
-  ActivityIndicator, // ✅ IMPORTACIÓN AGREGADA
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
@@ -20,7 +21,7 @@ export default function ProductoListScreen() {
   const { data: products, loading, refetch } = useFetch(getProducts);
   const [filterText, setFilterText] = React.useState('');
 
-  const filteredProducts = products.filter((p) =>
+  const filteredProducts = (products ?? []).filter((p) =>
     p.name.toLowerCase().includes(filterText.toLowerCase())
   );
 
@@ -34,6 +35,7 @@ export default function ProductoListScreen() {
       <TouchableOpacity
         style={tableStyles.addButton}
         onPress={() => navigation.navigate('ProductoCreate')}
+        accessibilityLabel="Agregar nuevo producto"
       >
         <Text style={tableStyles.addButtonText}>Agregar Producto</Text>
       </TouchableOpacity>
@@ -51,9 +53,11 @@ export default function ProductoListScreen() {
 
   return (
     <CardScrollView>
+
       <TouchableOpacity
         style={tableStyles.addButton}
         onPress={() => navigation.navigate('ProductoCreate')}
+        accessibilityLabel="Agregar nuevo producto"
       >
         <Text style={tableStyles.addButtonText}>Agregar Producto</Text>
       </TouchableOpacity>
@@ -91,9 +95,7 @@ export default function ProductoListScreen() {
         emptyComponent={emptyComponent}
         flatListRef={flatListRef}
         filterPlaceholder="Filtrar productos..."
-        onSort={() => {
-          onTableAction();
-        }}
+        onSort={onTableAction}
       />
 
       <Toast />

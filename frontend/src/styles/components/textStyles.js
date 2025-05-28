@@ -1,20 +1,21 @@
-//src/styles/components/textStyles.js
+// src/styles/components/textStyles.js
 import { StyleSheet } from 'react-native';
 import colors from '../base/colors';
 import fonts from '../base/fonts';
+import spacing from '../base/spacing';
 
 export default StyleSheet.create({
   header: {
     fontSize: fonts.sizes.large,
     fontWeight: fonts.weights.bold,
-    marginBottom: 25,
+    marginBottom: spacing.xl,
     color: colors.textDark,
     alignSelf: 'center',
   },
   title: {
     fontSize: fonts.sizes.large,
     fontWeight: fonts.weights.bold,
-    marginBottom: 30,
+    marginBottom: spacing.xxl,
     alignSelf: 'center',
     color: colors.textDark,
   },
@@ -24,9 +25,16 @@ export default StyleSheet.create({
     fontWeight: fonts.weights.semiBold,
     textAlign: 'center',
   },
+  largeSlogan: {
+    fontSize: fonts.sizes.large,
+    color: colors.textPrimary,
+    fontWeight: fonts.weights.semiBold,
+    textAlign: 'center',
+    marginBottom: 40,
+  },
   showPasswordText: {
     color: colors.primaryBlue,
-    paddingHorizontal: 8,
+    paddingHorizontal: spacing.sm,
     fontWeight: fonts.weights.semiBold,
   },
   eyeText: {
@@ -36,7 +44,7 @@ export default StyleSheet.create({
   textButton: {
     color: colors.primaryBlue,
     textAlign: 'right',
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   text: {
     fontSize: fonts.sizes.base,
@@ -67,7 +75,7 @@ export default StyleSheet.create({
   instructions: {
     fontSize: fonts.sizes.base,
     color: colors.textMedium,
-    marginBottom: 20,
+    marginBottom: spacing.lg,
     textAlign: 'center',
   },
 });

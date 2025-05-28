@@ -4,7 +4,6 @@ import { KeyboardAvoidingView, Platform } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useNavigation } from '@react-navigation/native';
 import ProductForm from './ProductForm';
-import { formStyles } from '../../styles/components/formStyles';
 import { createProduct } from '../../services/productoService';
 import CardScrollView from '../../components/CardScrollView';
 
@@ -31,9 +30,7 @@ export default function ProductoCreateScreen() {
 
   return (
     <CardScrollView>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ProductForm onSubmit={handleCreate} />
       </KeyboardAvoidingView>
       <Toast />

@@ -7,4 +7,7 @@ export default {
   maxWidth: 400,
   separatorMarginVertical: 20,
   logoSize: 120, // Tamaño del logo centralizado
+  inputHorizontalPadding: 10,
+  shadowRadius: 10,
+  shadowElevation: 5,
 };

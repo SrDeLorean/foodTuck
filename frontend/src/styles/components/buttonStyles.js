@@ -1,44 +1,135 @@
-//src/styles/components/buttons.js
-import { StyleSheet } from 'react-native';
+//src/styles/components/buttonStyles.js
 import colors from '../base/colors';
-import metrics from '../base/metrics';
 import fonts from '../base/fonts';
-import spacing from '../base/spacing';
+import metrics from '../base/metrics';
 
-export default StyleSheet.create({
+const buttonStyles = {
   primaryButton: {
     backgroundColor: colors.primaryGreen,
+    paddingVertical: metrics.buttonVerticalPadding,
     borderRadius: metrics.borderRadius,
-    paddingVertical: spacing.md, // reemplaza metrics.buttonVerticalPadding si quieres
     alignItems: 'center',
-    marginBottom: spacing.lg,     // reemplaza 20
-    width: '100%',
-    maxWidth: metrics.maxWidth,
+    justifyContent: 'center',
+    marginBottom: 12,
   },
   primaryButtonText: {
     color: colors.white,
     fontSize: fonts.sizes.medium,
-    fontWeight: fonts.weights.bold,
+    fontFamily: fonts.families.semiBold,
+  },
+  secondaryButton: {
+    backgroundColor: colors.white,
+    borderColor: colors.primaryGreen,
+    borderWidth: 1,
+    paddingVertical: metrics.buttonVerticalPadding,
+    borderRadius: metrics.borderRadius,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  secondaryButtonText: {
+    color: colors.primaryGreen,
+    fontSize: fonts.sizes.medium,
+    fontFamily: fonts.families.semiBold,
   },
   googleButton: {
-    flexDirection: 'row',
-    borderColor: '#ddd',
-    borderWidth: 1,
-    borderRadius: metrics.borderRadius,
-    paddingVertical: spacing.sm, // reemplaza 12
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
-    maxWidth: metrics.maxWidth,
     backgroundColor: colors.white,
-  },
-  googleIcon: {
-    width: 24,
-    height: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: metrics.buttonVerticalPadding,
+    borderRadius: metrics.borderRadius,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
   },
   googleButtonText: {
-    marginLeft: 10,
-    fontSize: fonts.sizes.base,
-    color: colors.googleRed,
+    color: colors.textPrimary,
+    fontSize: fonts.sizes.medium,
+    fontFamily: fonts.families.semiBold,
+    marginLeft: 8,
   },
-});
+  googleIcon: {
+    width: 20,
+    height: 20,
+  },
+
+  // --- Nuevos estilos agregados ---
+
+  disabledButton: {
+    backgroundColor: colors.grayLight,
+    paddingVertical: metrics.buttonVerticalPadding,
+    borderRadius: metrics.borderRadius,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  disabledButtonText: {
+    color: colors.grayDark,
+    fontSize: fonts.sizes.medium,
+    fontFamily: fonts.families.semiBold,
+  },
+
+  shadowButton: {
+    backgroundColor: colors.primaryGreen,
+    paddingVertical: metrics.buttonVerticalPadding,
+    borderRadius: metrics.borderRadius,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4, // para Android
+  },
+
+  roundedButton: {
+    backgroundColor: colors.primaryGreen,
+    paddingVertical: metrics.buttonVerticalPadding,
+    borderRadius: metrics.borderRadius * 2, // más redondeado
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+
+  smallButton: {
+    backgroundColor: colors.primaryGreen,
+    paddingVertical: metrics.buttonVerticalPadding / 2,
+    paddingHorizontal: metrics.buttonVerticalPadding,
+    borderRadius: metrics.borderRadius,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  smallButtonText: {
+    color: colors.white,
+    fontSize: fonts.sizes.small,
+    fontFamily: fonts.families.semiBold,
+  },
+
+  largeButton: {
+    backgroundColor: colors.primaryGreen,
+    paddingVertical: metrics.buttonVerticalPadding * 1.5,
+    borderRadius: metrics.borderRadius,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  largeButtonText: {
+    color: colors.white,
+    fontSize: fonts.sizes.large,
+    fontFamily: fonts.families.semiBold,
+  },
+
+  loadingButton: {
+    backgroundColor: colors.primaryGreen,
+    paddingVertical: metrics.buttonVerticalPadding,
+    borderRadius: metrics.borderRadius,
+    alignItems: 'center',
+    justifyContent: 'center',
+    opacity: 0.7,
+    marginBottom: 12,
+  },
+};
+
+export default buttonStyles;

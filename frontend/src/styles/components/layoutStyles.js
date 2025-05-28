@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 import colors from '../base/colors';
 import metrics from '../base/metrics';
 import fonts from '../base/fonts';
+import spacing from '../base/spacing';
 
 export default StyleSheet.create({
   container: {
@@ -20,29 +21,29 @@ export default StyleSheet.create({
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 20,
-    marginTop: 20,
+    marginBottom: spacing.lg,
+    marginTop: spacing.lg,
   },
   logo: {
     width: metrics.logoSize,
     height: metrics.logoSize,
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   checkboxContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: spacing.lg,
     maxWidth: metrics.maxWidth,
     width: '100%',
   },
   registerContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 30,
+    marginTop: spacing.xl,
   },
   loginContainer: {
     flexDirection: 'row',
-    marginTop: 25,
+    marginTop: spacing.lg,
   },
   separatorContainer: {
     flexDirection: 'row',
@@ -57,12 +58,12 @@ export default StyleSheet.create({
     backgroundColor: colors.borderLight,
   },
   separatorText: {
-    marginHorizontal: 10,
+    marginHorizontal: spacing.base,
     fontSize: fonts.sizes.base,
     color: colors.textMedium,
     fontWeight: fonts.weights.bold,
   },
   checkbox: {
-    marginRight: 8,
+    marginRight: spacing.sm,
   },
 });

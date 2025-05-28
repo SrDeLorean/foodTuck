@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 import colors from '../base/colors';
 import fonts from '../base/fonts';
 import metrics from '../base/metrics';
+import spacing from '../base/spacing';
 
 export default StyleSheet.create({
   flexCenter: {

@@ -1,105 +1,51 @@
-// src/views/guest/WelcomeScreen.js
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Image, TouchableOpacity } from 'react-native';
+import buttons from '../../styles/components/buttonStyles'; // estilos botones
+import colors from '../../styles/base/colors'; // colores base
+import textStyles from '../../styles/components/textStyles'; // estilos textos
 
 export default function WelcomeScreen({ navigation }) {
   return (
-    <View style={styles.container}>
+    <View style={{
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20,
+      backgroundColor: colors.white,
+    }}>
       <Image
-        source={require('../../assets/foodtruck-logo.png')} // Pon aquí tu logo local o URL
-        style={styles.logo}
+        source={require('../../assets/foodtruck-logo.png')}
+        style={{ width: 150, height: 150, marginBottom: 30 }}
         resizeMode="contain"
       />
-      <Text style={styles.slogan}>Descubre sabores sobre ruedas</Text>
+      <Text style={textStyles.largeSlogan}>
+        Descubre sabores sobre ruedas
+      </Text>
 
       <TouchableOpacity
-        style={styles.primaryButton}
+        style={buttons.primaryButton}
         onPress={() => navigation.navigate('Login')}
       >
-        <Text style={styles.primaryButtonText}>Iniciar Sesión</Text>
+        <Text style={buttons.primaryButtonText}>Iniciar Sesión</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={styles.secondaryButton}
+        style={buttons.secondaryButton}
         onPress={() => navigation.navigate('Register')}
       >
-        <Text style={styles.secondaryButtonText}>Registrarse</Text>
+        <Text style={buttons.secondaryButtonText}>Registrarse</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={styles.googleButton}
-        onPress={() => {/* Lógica para iniciar sesión con Google */}}
+        style={buttons.googleButton}
+        onPress={() => {/* lógica para login con Google */}}
       >
         <Image
           source={require('../../assets/google-icon.png')}
-          style={styles.googleIcon}
+          style={buttons.googleIcon}
         />
-        <Text style={styles.googleButtonText}>Continuar con Google</Text>
+        <Text style={buttons.googleButtonText}>Continuar con Google</Text>
       </TouchableOpacity>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  logo: {
-    width: 150,
-    height: 150,
-    marginBottom: 30,
-  },
-  slogan: {
-    fontSize: 20,
-    color: '#333',
-    marginBottom: 40,
-    textAlign: 'center',
-  },
-  primaryButton: {
-    backgroundColor: '#28a745',
-    paddingVertical: 14,
-    paddingHorizontal: 80,
-    borderRadius: 8,
-    marginBottom: 15,
-  },
-  primaryButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  secondaryButton: {
-    borderColor: '#28a745',
-    borderWidth: 2,
-    paddingVertical: 14,
-    paddingHorizontal: 80,
-    borderRadius: 8,
-    marginBottom: 20,
-  },
-  secondaryButtonText: {
-    color: '#28a745',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  googleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderColor: '#dcdcdc',
-    borderWidth: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-  },
-  googleIcon: {
-    width: 24,
-    height: 24,
-    marginRight: 10,
-  },
-  googleButtonText: {
-    fontSize: 16,
-    color: '#555',
-  },
-});
